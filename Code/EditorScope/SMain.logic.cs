@@ -10,7 +10,7 @@ public partial class SMain : UIScene
 
     MATRIX2x3 offset;
     MATRIX2x3 offsetInvert;
-    ANIMATION animation;
+    TEXTURE animation;
     List<RECT> rects = new List<RECT>();
     VECTOR2 start = new VECTOR2(float.NaN, 0);
     VECTOR2 dragOffset = new VECTOR2(float.NaN, 0);
@@ -24,8 +24,16 @@ public partial class SMain : UIScene
         Initialize();
         TBResult.TextEditOver += new Action<Label>(TBResult_TextEditOver);
         BSave.Clicked += new DUpdate<UIElement>(BSave_Clicked);
+        DragFile = DragLoad;
+        DDAction.Visible = false;
     }
 
+    void DragLoad(string[] files)
+    {
+        string file = files[0];
+        if (animation != null) Content.Dispose(animation.Key);
+        animation = Content.Load<TEXTURE>("TEXTURE", file);
+    }
     void Copy()
     {
         Entry.INPUT.InputDevice.Copy(TBResult.Text);
@@ -224,7 +232,7 @@ public partial class SMain : UIScene
         spriteBatch.Begin(offset);
 
         if (animation != null)
-            spriteBatch.Draw(animation, VECTOR2.Zero);
+            spriteBatch.Draw(animation, VECTOR2.Zero, 0, 0.5f, 0.5f);
 
         for (int i = 0; i < rects.Count; i++)
             spriteBatch.Draw(area, rects[i]);

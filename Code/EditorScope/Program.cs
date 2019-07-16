@@ -86,7 +86,7 @@ namespace PCRun
             //};
             // 注意：这里不适合更换环境设备，因为此程序不跨平台
             // 若需要更换的环境设备支持跨平台，应在程序显示的第一个菜单里更换
-            Environment.CurrentDirectory = "..\\Content\\";
+            //Environment.CurrentDirectory = "..\\Content\\";
 #endif
             // entry.OnNewContentManager += ...;
 

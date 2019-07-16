@@ -212,8 +212,8 @@ public partial class SMain
         TB190712145935.Add(L190712150313[3]);
         L190712150313[4].Name = "L190712150313";
         EntryEngine.RECT L190712150313_4__Clip = new EntryEngine.RECT();
-        L190712150313_4__Clip.X = 17f;
-        L190712150313_4__Clip.Y = 678.125f;
+        L190712150313_4__Clip.X = 18f;
+        L190712150313_4__Clip.Y = 696.375f;
         L190712150313_4__Clip.Width = 446f;
         L190712150313_4__Clip.Height = 0;
         L190712150313[4].Clip = L190712150313_4__Clip;
