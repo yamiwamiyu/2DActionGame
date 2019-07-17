@@ -32,7 +32,13 @@ public partial class SMain : UIScene
     {
         string file = files[0];
         if (animation != null) Content.Dispose(animation.Key);
-        animation = Content.Load<TEXTURE>("TEXTURE", file);
+        try
+        {
+            animation = Content.Load<TEXTURE>("TEXTURE", file);
+        }
+        catch (Exception)
+        {
+        }
     }
     void Copy()
     {

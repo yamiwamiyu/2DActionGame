@@ -222,9 +222,7 @@ public class MAIN : UIScene
             {
                 if (jumpSpeed.Y == 0)
                 {
-                    RECT next = chara;
-                    next.X -= SPEED * (running ? RUNNING : 1);
-                    CheckCollision(next);
+                    CheckCollisionX(-SPEED * (running ? RUNNING : 1));
                 }
                 else
                 {
@@ -238,9 +236,7 @@ public class MAIN : UIScene
             {
                 if (jumpSpeed.Y == 0)
                 {
-                    RECT next = chara;
-                    next.X += SPEED * (running ? RUNNING : 1);
-                    CheckCollision(next);
+                    CheckCollisionX(SPEED * (running ? RUNNING : 1));
                 }
                 else
                 {

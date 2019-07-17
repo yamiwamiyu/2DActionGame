@@ -46,7 +46,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Windows.Forms" />
     <Reference Include="Xna">
       <HintPath>..\Client\Xna.dll</HintPath>
       <Private>False</Private>
