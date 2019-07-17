@@ -47,11 +47,13 @@ public class MAIN : UIScene
         tileTexture = PATCH.GetNinePatch(new COLOR(255, 0, 0, 32), new COLOR(255, 0, 0, 196), 1);
 
         RECT rect = new RECT(0, 600, 100, 30);
-        tile = new RECT[100];
+        tile = new RECT[50];
         for (int i = 0; i < tile.Length; i++)
         {
             tile[i] = rect;
             rect.X += rect.Width;
+            if (i == 6)
+                rect.Y -= 60;
             if (i > 7)
             {
                 rect.Y -= 9;
@@ -59,6 +61,7 @@ public class MAIN : UIScene
             }
             mapWidth += rect.Width;
         }
+        tile[tile.Length - 1] = new RECT(200, 400, 30, 120);
 
         charaTexture = PATCH.GetNinePatch(new COLOR(0, 255, 0, 32), new COLOR(0, 255, 0, 196), 1);
         chara = new RECT(200, 150, 50, 50);
@@ -80,48 +83,88 @@ public class MAIN : UIScene
     const float G = 0.98f;
     const float FLY = 0.2f;
     const float JUMP = -15;
+    const float CLIMB_THRESHOLD = 10;
     bool running;
-    enum EMove
+    void CheckCollisionX(float x)
     {
-        Jump,
-        Move,
+        RECT next = chara;
+        next.X += x;
+        CheckCollision(next);
     }
-    void CheckCollision(RECT next, EMove move)
+    void CheckCollisionY(float y)
     {
+        RECT next = chara;
+        next.Y += y;
+        CheckCollision(next);
+    }
+    void CheckCollision(RECT next)
+    {
+        bool _left = next.X < chara.X;
+        bool _right = next.X > chara.X;
+        bool _up = next.Y < chara.Y;
+        bool _down = next.Y > chara.Y;
+
         bool moved = true;
         float firstX = float.NaN;
         for (int i = 0; i < tile.Length; i++)
         {
             if (tile[i].Intersects(ref next))
             {
-                if (move == EMove.Move)
+                RECT intersect;
+                RECT.Intersect(ref tile[i], ref next, out intersect);
+                // 稍微凸起的地面
+                if (intersect.Bottom == next.Bottom && next.Y <= chara.Y)
                 {
-                    RECT intersect;
-                    RECT.Intersect(ref tile[i], ref next, out intersect);
-                    // 稍微凸起的地面
-                    if (intersect.Bottom == next.Bottom)
+                    if (intersect.Height < CLIMB_THRESHOLD)
                     {
-                        if (intersect.Height < 10)
+                        // 防止大坡度时走得太快
+                        if (float.IsNaN(firstX))
                         {
-                            // 防止大坡度时走得太快
-                            if (float.IsNaN(firstX))
-                            {
-                                // 上楼梯
-                                next.Y -= intersect.Height;
+                            // 上楼梯
+                            next.Y -= intersect.Height;
 
-                                firstX = next.X - intersect.Width;
-                                i = -1;
-                                continue;
-                            }
-                            else
-                            {
-                                next.X = firstX;
-                                break;
-                            }
+                            firstX = next.X - intersect.Width;
+                            i = -1;
+                            continue;
+                        }
+                        else
+                        {
+                            next.X = firstX;
+                            break;
                         }
                     }
                 }
+                if (_down)
+                {
+                    // 向下移动时向上挤出
+                    next.Y -= intersect.Height;
+                    if (next.Y > chara.Y)
+                        continue;
+                }
+                if (_right)
+                {
+                    // 向右移动时向左挤出
+                    next.X -= intersect.Width;
+                    if (next.X > chara.X)
+                        continue;
+                }
+                if (_left)
+                {
+                    // 向左移动时向右挤出
+                    next.X += intersect.Width;
+                    if (next.X < chara.X)
+                        continue;
+                }
+                if (_up)
+                {
+                    // 向上移动时向下挤出
+                    next.Y += intersect.Height;
+                    if (next.Y < chara.Y)
+                        continue;
+                }
+
                 moved = false;
+                break;
             }
         }
 
@@ -144,8 +187,11 @@ public class MAIN : UIScene
         }
         else
         {
-            jumpSpeed.X = 0;
-            jumpSpeed.Y = 0;
+            if (_down)
+            {
+                jumpSpeed.X = 0;
+                jumpSpeed.Y = 0;
+            }
         }
     }
     protected override void InternalEvent(Entry e)
@@ -178,7 +224,7 @@ public class MAIN : UIScene
                 {
                     RECT next = chara;
                     next.X -= SPEED * (running ? RUNNING : 1);
-                    CheckCollision(next, EMove.Move);
+                    CheckCollision(next);
                 }
                 else
                 {
@@ -194,7 +240,7 @@ public class MAIN : UIScene
                 {
                     RECT next = chara;
                     next.X += SPEED * (running ? RUNNING : 1);
-                    CheckCollision(next, EMove.Move);
+                    CheckCollision(next);
                 }
                 else
                 {
@@ -231,10 +277,8 @@ public class MAIN : UIScene
         jumpSpeed.Y += G;
 
         // 下落
-        RECT next = chara;
-        next.X += jumpSpeed.X;
-        next.Y += jumpSpeed.Y;
-        CheckCollision(next, EMove.Jump);
+        CheckCollisionX(jumpSpeed.X);
+        CheckCollisionY(jumpSpeed.Y);
     }
     protected override void InternalDraw(GRAPHICS spriteBatch, Entry e)
     {
