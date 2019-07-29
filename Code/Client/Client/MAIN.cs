@@ -47,7 +47,7 @@ public class MAIN : UIScene
         tileTexture = PATCH.GetNinePatch(new COLOR(255, 0, 0, 32), new COLOR(255, 0, 0, 196), 1);
 
         RECT rect = new RECT(0, 600, 100, 30);
-        tile = new RECT[50];
+        tile = new RECT[200];
         for (int i = 0; i < tile.Length; i++)
         {
             tile[i] = rect;
@@ -56,8 +56,8 @@ public class MAIN : UIScene
                 rect.Y -= 60;
             if (i > 7)
             {
-                rect.Y -= 9;
-                //rect.Width = 5;
+                rect.Y -= 5;
+                rect.Width = 10;
             }
             mapWidth += rect.Width;
         }
@@ -85,31 +85,34 @@ public class MAIN : UIScene
     const float JUMP = -15;
     const float CLIMB_THRESHOLD = 10;
     bool running;
-    void CheckCollisionX(float x)
+    bool CheckMoveX(float x)
     {
         RECT next = chara;
         next.X += x;
-        CheckCollision(next);
+        return CheckMove(next);
     }
-    void CheckCollisionY(float y)
+    bool CheckMoveY(float y)
     {
         RECT next = chara;
         next.Y += y;
-        CheckCollision(next);
+        return CheckMove(next);
     }
-    void CheckCollision(RECT next)
+    bool CheckMove(RECT next)
     {
         bool _left = next.X < chara.X;
         bool _right = next.X > chara.X;
         bool _up = next.Y < chara.Y;
         bool _down = next.Y > chara.Y;
 
+        bool hitFlag = false;
         bool moved = true;
         float firstX = float.NaN;
         for (int i = 0; i < tile.Length; i++)
         {
             if (tile[i].Intersects(ref next))
             {
+                hitFlag = true;
+
                 RECT intersect;
                 RECT.Intersect(ref tile[i], ref next, out intersect);
                 // 稍微凸起的地面
@@ -137,28 +140,32 @@ public class MAIN : UIScene
                 if (_down)
                 {
                     // 向下移动时向上挤出
-                    next.Y -= intersect.Height;
+                    //next.Y -= intersect.Height;
+                    next.Y = intersect.Y - next.Height;
                     if (next.Y > chara.Y)
                         continue;
                 }
                 if (_right)
                 {
                     // 向右移动时向左挤出
-                    next.X -= intersect.Width;
+                    //next.X -= intersect.Width;
+                    next.X = intersect.X - next.Width;
                     if (next.X > chara.X)
                         continue;
                 }
                 if (_left)
                 {
                     // 向左移动时向右挤出
-                    next.X += intersect.Width;
+                    //next.X += intersect.Width;
+                    next.X = intersect.Right;
                     if (next.X < chara.X)
                         continue;
                 }
                 if (_up)
                 {
                     // 向上移动时向下挤出
-                    next.Y += intersect.Height;
+                    //next.Y += intersect.Height;
+                    next.Y = intersect.Bottom;
                     if (next.Y < chara.Y)
                         continue;
                 }
@@ -185,14 +192,14 @@ public class MAIN : UIScene
             else
                 offset.M31 = gsizeHalf - next.X;
         }
-        else
+
+        if (_down && (!moved || hitFlag))
         {
-            if (_down)
-            {
-                jumpSpeed.X = 0;
-                jumpSpeed.Y = 0;
-            }
+            jumpSpeed.X = 0;
+            jumpSpeed.Y = 0;
         }
+
+        return moved;
     }
     protected override void InternalEvent(Entry e)
     {
@@ -222,7 +229,7 @@ public class MAIN : UIScene
             {
                 if (jumpSpeed.Y == 0)
                 {
-                    CheckCollisionX(-SPEED * (running ? RUNNING : 1));
+                    CheckMoveX(-SPEED * (running ? RUNNING : 1));
                 }
                 else
                 {
@@ -236,7 +243,7 @@ public class MAIN : UIScene
             {
                 if (jumpSpeed.Y == 0)
                 {
-                    CheckCollisionX(SPEED * (running ? RUNNING : 1));
+                    CheckMoveX(SPEED * (running ? RUNNING : 1));
                 }
                 else
                 {
@@ -269,12 +276,25 @@ public class MAIN : UIScene
     {
         base.InternalUpdate(e);
 
+        // 左右移动之后悬空时，坡度较小时直接下坡
+        if (jumpSpeed.Y == 0)
+        {
+            jumpSpeed.Y = CLIMB_THRESHOLD;
+            var temp = chara;
+            if (!CheckMoveY(jumpSpeed.Y) || jumpSpeed.Y != 0)
+            {
+                // 原本就站在地面上 || 空中下坠
+                chara = temp;
+                jumpSpeed.Y = 0;
+            }
+        }
         // 重力加速度
         jumpSpeed.Y += G;
 
         // 下落
-        CheckCollisionX(jumpSpeed.X);
-        CheckCollisionY(jumpSpeed.Y);
+        if (jumpSpeed.X != 0)
+            CheckMoveX(jumpSpeed.X);
+        CheckMoveY(jumpSpeed.Y);
     }
     protected override void InternalDraw(GRAPHICS spriteBatch, Entry e)
     {
