@@ -195,7 +195,7 @@ public partial class SMain
         L190712150313[3].Clip = L190712150313_3__Clip;
         
         L190712150313[3].UIText = new EntryEngine.UI.UIText();
-        L190712150313[3].UIText.Text = "拖拽动作文件到视口加载动作";
+        L190712150313[3].UIText.Text = "拖拽图片文件到视口加载图片，回车切换绘图锚点";
         L190712150313[3].UIText.FontColor = new COLOR()
         {
             B = 255,
@@ -208,7 +208,7 @@ public partial class SMain
         L190712150313[3].UIText.Padding.X = 0f;
         L190712150313[3].UIText.Padding.Y = 0f;
         L190712150313[3].UIText.FontSize = 16f;
-        L190712150313[3].Text = "拖拽动作文件到视口加载动作";
+        L190712150313[3].Text = "拖拽图片文件到视口加载图片，回车切换绘图锚点";
         TB190712145935.Add(L190712150313[3]);
         L190712150313[4].Name = "L190712150313";
         EntryEngine.RECT L190712150313_4__Clip = new EntryEngine.RECT();

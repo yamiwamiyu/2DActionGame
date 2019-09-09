@@ -71,7 +71,7 @@ namespace PCRun
         static void gate_OnInitialized(Entry entry)
         {
             // 在此设置测试环境参数
-            entry.GRAPHICS.GraphicsSize = new VECTOR2(1280, 720);
+            entry.GRAPHICS.GraphicsSize = new VECTOR2(1600, 900);
             entry.GRAPHICS.ScreenSize = entry.GRAPHICS.GraphicsSize;
             //entry.GRAPHICS.ViewportMode = EViewport.Strength;
 #if HTML5

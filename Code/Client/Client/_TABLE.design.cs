@@ -12,9 +12,9 @@ using EntryEngine.Serialize;
     /// <summary>地形ID</summary>
     public ushort TID;
     /// <summary>地形放置的横坐标</summary>
-    public float X;
+    public int X;
     /// <summary>地形放置的纵坐标</summary>
-    public float Y;
+    public int Y;
     /// <summary>锁屏模式，-1代表不能回头，1代表不能继续向前（例如打完某个小BOSS才能继续向前）</summary>
     public sbyte Lock;
     static T地图()
@@ -22,8 +22,8 @@ using EntryEngine.Serialize;
         T地图 T地图 = new T地图();
         T地图.ID = default(ushort);
         T地图.TID = default(ushort);
-        T地图.X = default(float);
-        T地图.Y = default(float);
+        T地图.X = default(int);
+        T地图.Y = default(int);
         T地图.Lock = default(sbyte);
     }
     
@@ -39,15 +39,15 @@ using EntryEngine.Serialize;
     /// <summary>碰撞范围矩形，不填则不碰撞</summary>
     [NonSerialized]
     public RECT[] _Hit;
-    /// <summary>是否可以上下穿过</summary>
-    public bool UpDownCross;
+    /// <summary>0.不翻转 / 1.水平翻转 / 2.垂直翻转 / 3.水平垂直翻转</summary>
+    public EFlip Flip;
     static T地形()
     {
         T地形 T地形 = new T地形();
         T地形.ID = default(ushort);
         T地形.Texture = default(string);
         T地形.Hit = null;
-        T地形.UpDownCross = default(bool);
+        T地形.Flip = default(EFlip);
     }
     
 }

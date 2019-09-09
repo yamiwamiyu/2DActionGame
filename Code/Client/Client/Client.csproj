@@ -43,6 +43,7 @@
     <Compile Include="Game\MAP.cs" />
     <Compile Include="MAIN.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="_TABLE.cs" />
     <Compile Include="_TABLE.design.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -56,7 +56,7 @@ public class MAIN : UIScene
                 rect.Y -= 60;
             if (i > 7)
             {
-                rect.Y -= 5;
+                rect.Y -= 9;
                 rect.Width = 10;
             }
             mapWidth += rect.Width;
@@ -67,6 +67,8 @@ public class MAIN : UIScene
         chara = new RECT(200, 150, 50, 50);
 
         Entry.INPUT.Keyboard.AddMultipleClick((int)PCKeys.A, (int)PCKeys.D);
+
+        anime = Content.Load<ANIMATION>("Actions\\蒲公英.mtseq");
 
         yield break;
     }
@@ -82,9 +84,11 @@ public class MAIN : UIScene
     const float RUNNING = 3f;
     const float G = 0.98f;
     const float FLY = 0.2f;
-    const float JUMP = -15;
+    const float JUMP = -25;
     const float CLIMB_THRESHOLD = 10;
     bool running;
+    ANIMATION anime;
+    EFlip flip;
     bool CheckMoveX(float x)
     {
         RECT next = chara;
@@ -227,9 +231,11 @@ public class MAIN : UIScene
         {
             if (keys[i] == (int)PCKeys.A)
             {
+                flip = EFlip.FlipHorizontally;
                 if (jumpSpeed.Y == 0)
                 {
                     CheckMoveX(-SPEED * (running ? RUNNING : 1));
+                    anime.Play("移动");
                 }
                 else
                 {
@@ -241,9 +247,11 @@ public class MAIN : UIScene
             }
             else if (keys[i] == (int)PCKeys.D)
             {
+                flip = EFlip.None;
                 if (jumpSpeed.Y == 0)
                 {
                     CheckMoveX(SPEED * (running ? RUNNING : 1));
+                    anime.Play("移动");
                 }
                 else
                 {
@@ -258,6 +266,7 @@ public class MAIN : UIScene
         // 单击跳跃
         if (jumpSpeed.Y == 0 && e.INPUT.Keyboard.IsPressed(PCKeys.W))
         {
+            anime.Play("起跳");
             jumpSpeed.Y = JUMP;
             if (doMove)
             {
@@ -270,7 +279,11 @@ public class MAIN : UIScene
                 jumpSpeed.X = 0;
         }
         if (!doMove)
+        {
             running = false;
+            if (jumpSpeed.Y == 0 && anime.Sequence.Name == "移动")
+                anime.Play("待机");
+        }
     }
     protected override void InternalUpdate(Entry e)
     {
@@ -281,20 +294,29 @@ public class MAIN : UIScene
         {
             jumpSpeed.Y = CLIMB_THRESHOLD;
             var temp = chara;
-            if (!CheckMoveY(jumpSpeed.Y) || jumpSpeed.Y != 0)
+            bool moved = CheckMoveY(jumpSpeed.Y);
+            if (!moved || jumpSpeed.Y != 0)
             {
+                if (jumpSpeed.Y != 0)
+                    anime.Play("下落");
                 // 原本就站在地面上 || 空中下坠
                 chara = temp;
                 jumpSpeed.Y = 0;
             }
         }
         // 重力加速度
+        float tempY = jumpSpeed.Y;
         jumpSpeed.Y += G;
+        // 由上升变为降落
+        if (tempY < 0 && jumpSpeed.Y > 0)
+            anime.Play("下落");
 
         // 下落
         if (jumpSpeed.X != 0)
             CheckMoveX(jumpSpeed.X);
         CheckMoveY(jumpSpeed.Y);
+        if (tempY != 0 && jumpSpeed.Y == 0)
+            anime.Play("落地");
     }
     protected override void InternalDraw(GRAPHICS spriteBatch, Entry e)
     {
@@ -307,6 +329,7 @@ public class MAIN : UIScene
             spriteBatch.Draw(tileTexture, tile[i]);
         }
 
+        spriteBatch.Draw(anime, chara.Location, 0, 0, 0, 1, 1, flip);
         spriteBatch.Draw(charaTexture, chara);
 
         spriteBatch.End();

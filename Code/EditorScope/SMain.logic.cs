@@ -35,6 +35,8 @@ public partial class SMain : UIScene
         try
         {
             animation = Content.Load<TEXTURE>("TEXTURE", file);
+            rects.Clear();
+            ResetViewport();
         }
         catch (Exception)
         {
@@ -120,6 +122,18 @@ public partial class SMain : UIScene
         return -1;
     }
 
+    EPivot[] pivots = {
+                          EPivot.TopLeft,
+                          EPivot.TopCenter,
+                          EPivot.TopRight,
+                          EPivot.MiddleLeft,
+                          EPivot.MiddleCenter,
+                          EPivot.MiddleRight,
+                          EPivot.BottomLeft,
+                          EPivot.BottomCenter,
+                          EPivot.BottomRight,
+                      };
+    int pivot = 4;
     protected override void InternalUpdate(Entry e)
     {
         base.InternalUpdate(e);
@@ -129,6 +143,13 @@ public partial class SMain : UIScene
     protected override void InternalEvent(Entry e)
     {
         base.InternalEvent(e);
+        // 切换锚点
+        if (e.INPUT.Keyboard.IsClick(PCKeys.Enter))
+        {
+            pivot++;
+            if (pivot == pivots.Length)
+                pivot = 0;
+        }
         // 空格重置视口
         if (e.INPUT.Keyboard.IsClick(PCKeys.Space))
             ResetViewport();
@@ -192,7 +213,9 @@ public partial class SMain : UIScene
             else if (Creating)
             {
                 // 确认创建
-                rects.Add(RECT.CreateRectangle(start, GetCurrentPosition()));
+                var add = RECT.CreateRectangle(start, GetCurrentPosition());
+                if (add.Width >= 1 && add.Height >= 1)
+                    rects.Add(add);
                 start.X = float.NaN;
             }
         }
@@ -232,13 +255,16 @@ public partial class SMain : UIScene
     {
         base.InternalDraw(spriteBatch, e);
 
-        spriteBatch.Draw(TEXTURE.Pixel, new RECT(0, offset.M32, 800, 1), COLOR.Lime);
-        spriteBatch.Draw(TEXTURE.Pixel, new RECT(offset.M31, 0, 1, 800), COLOR.Lime);
+        spriteBatch.Draw(TEXTURE.Pixel, new RECT(0, offset.M32, 800, 1), COLOR.Lime, 0, 0, 0.5f, EFlip.None);
+        spriteBatch.Draw(TEXTURE.Pixel, new RECT(offset.M31, 0, 1, 800), COLOR.Lime, 0, 0.5f, 0, EFlip.None);
 
         spriteBatch.Begin(offset);
 
         if (animation != null)
-            spriteBatch.Draw(animation, VECTOR2.Zero, 0, 0.5f, 0.5f);
+        {
+            VECTOR2 pivotPoint = UIElement.CalcPivotPoint(VECTOR2.One, pivots[pivot]);
+            spriteBatch.Draw(animation, VECTOR2.Zero, 0, pivotPoint.X, pivotPoint.Y);
+        }
 
         for (int i = 0; i < rects.Count; i++)
             spriteBatch.Draw(area, rects[i]);
@@ -246,6 +272,10 @@ public partial class SMain : UIScene
             spriteBatch.Draw(area, RECT.CreateRectangle(start, GetCurrentPosition()));
 
         spriteBatch.End();
-        
+
+        {
+            VECTOR2 pivotPoint = UIElement.CalcPivotPoint(new VECTOR2(200, 200), pivots[pivot]);
+            spriteBatch.Draw(TEXTURE.Pixel, new VECTOR2(offset.M31 + pivotPoint.X - 100, offset.M32 + pivotPoint.Y - 100), COLOR.Red, 0, 0.5f, 0.5f, 5, 5);
+        }
     }
 }
