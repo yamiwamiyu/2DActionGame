@@ -1,1 +1,1 @@
-..\..\..\EntryBuilder.exe CopyFilesName Terrains "" true
+..\..\..\EntryBuilder.exe CopyFilesName Terrains "*" true
