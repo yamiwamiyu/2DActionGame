@@ -23,13 +23,41 @@ public partial class T地形
         }
     }
 }
+public partial class T动作
+{
+    public PCKeys[][] Command { get; set; }
+
+    public override string ToString()
+    {
+        return Action.ToString();
+    }
+}
 public static partial class _TABLE
 {
     static _TABLE()
     {
         OnLoadT地形 += new Action<T地形[]>(_TABLE_OnLoadT地形);
+        OnLoadT动作 += new Action<T动作[]>(_TABLE_OnLoadT动作);
     }
 
+    static void _TABLE_OnLoadT动作(T动作[] obj)
+    {
+        foreach (var item in obj)
+        {
+            if (item._Click != null)
+            {
+                item.Command = new PCKeys[item._Click.Length][];
+                for (int i = 0; i < item._Click.Length; i++)
+                {
+                    item.Command[i] = new PCKeys[item._Click[i].Length];
+                    for (int j = 0; j < item._Click[i].Length; j++)
+                    {
+                        item.Command[i][j] = (PCKeys)Enum.Parse(typeof(PCKeys), item._Click[i][j], true);
+                    }
+                }
+            }
+        }
+    }
     static void _TABLE_OnLoadT地形(T地形[] obj)
     {
         foreach (var item in obj)

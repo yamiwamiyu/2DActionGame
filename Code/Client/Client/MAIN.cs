@@ -33,10 +33,15 @@ public class MAIN : UIScene
         //_LANGUAGE.Load(_IO.ReadPreambleText(async.Data), "");
         //_LOG.Debug("加载语言表完毕");
 
-        //foreach (var item in _TABLE.LoadAsync("Tables\\"))
-        //    if (!item.IsEnd)
-        //        yield return item;
-        //_LOG.Debug("加载数据表完毕");
+        async = _IO.ReadAsync("Metadata.pcsv");
+        if (!async.IsEnd) yield return async;
+        PipelinePiece.GetDefaultPipeline().LoadMetadata(_IO.ReadPreambleText(async.Data));
+        _LOG.Debug("加载纹理集表完毕");
+
+        foreach (var item in _TABLE.LoadAsync("Tables\\"))
+            if (!item.IsEnd)
+                yield return item;
+        _LOG.Debug("加载数据表完毕");
 
         _IO.IOEncoding = encoding;
 
@@ -44,6 +49,7 @@ public class MAIN : UIScene
         //Entry.ShowMainScene<T>();
         //this.State = EState.Release;
 
+        Content = Entry.NewContentManager();
         tileTexture = PATCH.GetNinePatch(new COLOR(255, 0, 0, 32), new COLOR(255, 0, 0, 196), 1);
 
         RECT rect = new RECT(0, 600, 100, 30);
@@ -205,6 +211,10 @@ public class MAIN : UIScene
 
         return moved;
     }
+    void Action(T动作.ET动作Action action)
+    {
+        anime.Play(action.ToString());
+    }
     protected override void InternalEvent(Entry e)
     {
         base.InternalEvent(e);
@@ -235,7 +245,7 @@ public class MAIN : UIScene
                 if (jumpSpeed.Y == 0)
                 {
                     CheckMoveX(-SPEED * (running ? RUNNING : 1));
-                    anime.Play("移动");
+                    //Action(T动作.ET动作Action.蒲公英_移动);
                 }
                 else
                 {
@@ -251,7 +261,7 @@ public class MAIN : UIScene
                 if (jumpSpeed.Y == 0)
                 {
                     CheckMoveX(SPEED * (running ? RUNNING : 1));
-                    anime.Play("移动");
+                    //Action(T动作.ET动作Action.蒲公英_移动);
                 }
                 else
                 {
@@ -266,7 +276,7 @@ public class MAIN : UIScene
         // 单击跳跃
         if (jumpSpeed.Y == 0 && e.INPUT.Keyboard.IsPressed(PCKeys.W))
         {
-            anime.Play("起跳");
+            Action(T动作.ET动作Action.蒲公英_起跳);
             jumpSpeed.Y = JUMP;
             if (doMove)
             {
@@ -281,8 +291,8 @@ public class MAIN : UIScene
         if (!doMove)
         {
             running = false;
-            if (jumpSpeed.Y == 0 && anime.Sequence.Name == "移动")
-                anime.Play("待机");
+            //if (jumpSpeed.Y == 0 && anime.Sequence.Name == T动作.ET动作Action.蒲公英_移动.ToString())
+            //    Action(T动作.ET动作Action.蒲公英_待机);
         }
     }
     protected override void InternalUpdate(Entry e)
@@ -298,7 +308,7 @@ public class MAIN : UIScene
             if (!moved || jumpSpeed.Y != 0)
             {
                 if (jumpSpeed.Y != 0)
-                    anime.Play("下落");
+                    Action(T动作.ET动作Action.蒲公英_下落);
                 // 原本就站在地面上 || 空中下坠
                 chara = temp;
                 jumpSpeed.Y = 0;
@@ -309,14 +319,14 @@ public class MAIN : UIScene
         jumpSpeed.Y += G;
         // 由上升变为降落
         if (tempY < 0 && jumpSpeed.Y > 0)
-            anime.Play("下落");
+            Action(T动作.ET动作Action.蒲公英_下落);
 
         // 下落
         if (jumpSpeed.X != 0)
             CheckMoveX(jumpSpeed.X);
         CheckMoveY(jumpSpeed.Y);
         if (tempY != 0 && jumpSpeed.Y == 0)
-            anime.Play("落地");
+            Action(T动作.ET动作Action.蒲公英_落地);
     }
     protected override void InternalDraw(GRAPHICS spriteBatch, Entry e)
     {
